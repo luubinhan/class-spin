@@ -59,6 +59,14 @@ const App: React.FC = () => {
   };
 
   const handleReset = () => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    setInputText(saved !== null ? saved : '');
+    setWinner(null);
+    setGameState(GameState.IDLE);
+    setShowWinnerModal(false);
+  };
+
+  const handleRemoveAll = () => {
     setInputText('');
     setWinner(null);
     setGameState(GameState.IDLE);
@@ -109,6 +117,13 @@ const App: React.FC = () => {
                 <List className="text-blue-400" size={20} />
                 <h2 className="font-bold text-lg">Class List ({items.length})</h2>
               </div>
+              <button
+                onClick={handleRemoveAll}
+                disabled={items.length === 0}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-900/30 hover:bg-red-800/50 text-red-400 hover:text-red-300 rounded-lg transition-colors border border-red-800/50 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Trash2 size={14} /> Remove All
+              </button>
             </div>
             
             <textarea

@@ -16,8 +16,8 @@ const Wheel: React.FC<WheelProps> = ({ items, spinning, onSpinEnd }) => {
   const lastTickIndexRef = useRef(-1);
   const requestRef = useRef<number | undefined>(undefined);
   
-  // The wheel rotates clockwise. The selection point is at 9 o'clock (Math.PI).
-  const POINTER_ANGLE = Math.PI;
+  // The wheel rotates clockwise. The selection point is at 3 o'clock (0 radians).
+  const POINTER_ANGLE = 0;
   
   const drawWheel = () => {
     const canvas = canvasRef.current;
@@ -130,11 +130,11 @@ const Wheel: React.FC<WheelProps> = ({ items, spinning, onSpinEnd }) => {
 
   return (
     <div className="relative group flex items-center justify-center">
-      {/* Pointer Arrow - Located at Left (9 o'clock) pointing RIGHT */}
-      <div className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-20 filter drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+      {/* Pointer Arrow - Located at Right (3 o'clock) pointing LEFT */}
+      <div className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-20 filter drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
         <div 
           className="w-10 h-10 bg-white" 
-          style={{ clipPath: 'polygon(0% 0%, 0% 100%, 100% 50%)' }}
+          style={{ clipPath: 'polygon(100% 0%, 100% 100%, 0% 50%)' }}
         ></div>
       </div>
       
