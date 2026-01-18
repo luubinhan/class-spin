@@ -1,56 +1,46 @@
-
 class AudioManager {
-  private ctx: AudioContext | null = null;
+  private audioContext: AudioContext | null = null;
+  private winSound: HTMLAudioElement | null = null;
 
-  private init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  constructor() {
+    this.initAudio();
+  }
+
+  private initAudio() {
+    try {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Load the win sound MP3
+      this.winSound = new Audio('/assets/win-sound.mp3');
+      this.winSound.preload = 'auto';
+    } catch (e) {
+      console.warn('Web Audio API not supported', e);
     }
   }
 
   playTick() {
-    this.init();
-    if (!this.ctx) return;
+    if (!this.audioContext) return;
     
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
     
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.05);
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
     
-    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
     
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.05);
     
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.05);
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + 0.05);
   }
 
   playWin() {
-    this.init();
-    if (!this.ctx) return;
-
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-    notes.forEach((freq, i) => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, this.ctx!.currentTime + i * 0.1);
-      
-      gain.gain.setValueAtTime(0, this.ctx!.currentTime + i * 0.1);
-      gain.gain.linearRampToValueAtTime(0.2, this.ctx!.currentTime + i * 0.1 + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + i * 0.1 + 0.4);
-      
-      osc.connect(gain);
-      gain.connect(this.ctx!.destination);
-      
-      osc.start(this.ctx!.currentTime + i * 0.1);
-      osc.stop(this.ctx!.currentTime + i * 0.1 + 0.5);
-    });
+    if (this.winSound) {
+      this.winSound.currentTime = 0;
+      this.winSound.play().catch(e => console.warn('Could not play win sound', e));
+    }
   }
 }
 

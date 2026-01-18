@@ -5,6 +5,7 @@ import { WHEEL_COLORS, INITIAL_NAMES } from './utils/constants';
 import { audioManager } from './utils/audio';
 import Wheel from './components/Wheel';
 import Confetti from './components/Confetti';
+import logo from './assets/class-spin.png';
 import { Trash2, RotateCcw, Play, List, Sparkles } from 'lucide-react';
 
 const STORAGE_KEY = 'class_spin_picker_entries';
@@ -89,8 +90,9 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center z-20 pointer-events-none">
         <div className="flex items-center gap-3 pointer-events-auto">
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-xl shadow-lg">
-            <Sparkles className="text-white" size={24} />
+          <div className="rounded-xl shadow-lg">
+            {/* <Sparkles className="text-white" size={24} /> */}
+            <img src={logo} width="45" alt="ClassSpin - Random Picker" />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
             ClassSpin
@@ -135,7 +137,7 @@ const App: React.FC = () => {
             />
 
             <div className="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
-              <span>Shortcut: <kbd className="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-400 font-sans">Ctrl+Enter</kbd></span>
+              <span>Shortcut: <kbd className="bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 text-slate-400 font-sans">Ctrl+Enter</kbd> to spin</span>
             </div>
           </div>
         </section>
@@ -189,10 +191,9 @@ const App: React.FC = () => {
           
           <div className="relative bg-slate-900 border border-slate-700 p-10 rounded-[48px] shadow-2xl w-full max-w-lg flex flex-col items-center text-center animate-in zoom-in slide-in-from-bottom-8 duration-500">
             <div 
-              className="w-28 h-28 rounded-full flex items-center justify-center mb-8 shadow-2xl ring-4 ring-white/10"
-              style={{ backgroundColor: winner?.color }}
+              className="w-28 h-28 rounded-full flex items-center justify-center"
             >
-              <Sparkles className="text-white" size={56} />
+              <img src={logo} alt="ClassSpin - Random Picker" width="80" />
             </div>
             <h3 className="text-blue-400 font-black uppercase tracking-[0.2em] text-sm mb-4">Selected Student</h3>
             <h2 className="text-6xl font-black text-white mb-10 drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] leading-tight">
