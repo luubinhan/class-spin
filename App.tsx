@@ -112,7 +112,7 @@ const App: React.FC = () => {
             </div>
             
             <textarea
-              className="flex-1 w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-4 text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none font-mono text-sm no-scrollbar transition-all"
+              className="flex-1 w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-4 text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none text-lg no-scrollbar transition-all"
               placeholder="Enter student names..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -154,8 +154,6 @@ const App: React.FC = () => {
                     <span className="text-lg leading-tight uppercase">Spin</span>
                   </>
                 )}
-                {/* Visual arrow decoration for button to feel part of wheel */}
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-blue-500 rotate-45 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </button>
             </div>
           </div>
