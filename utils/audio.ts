@@ -1,3 +1,5 @@
+import winSoundFile from '../assets/win-sound.mp3';
+
 class AudioManager {
   private audioContext: AudioContext | null = null;
   private winSound: HTMLAudioElement | null = null;
@@ -9,8 +11,8 @@ class AudioManager {
   private initAudio() {
     try {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      // Load the win sound MP3
-      this.winSound = new Audio('/assets/win-sound.mp3');
+      // Load the win sound MP3 using imported path
+      this.winSound = new Audio(winSoundFile);
       this.winSound.preload = 'auto';
     } catch (e) {
       console.warn('Web Audio API not supported', e);
