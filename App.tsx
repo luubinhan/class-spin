@@ -18,8 +18,9 @@ const App: React.FC = () => {
   
   const [items, setItems] = useState<WheelItem[]>([]);
   const [gameState, setGameState] = useState<GameState>(GameState.IDLE);
-  const [winner, setWinner] = useState<WheelItem | null>(null);
+  const [winners, setWinners] = useState<WheelItem[]>([]);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [pickCount, setPickCount] = useState<1 | 2>(1);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, inputText);
@@ -36,40 +37,51 @@ const App: React.FC = () => {
   }, [inputText]);
 
   const handleSpin = useCallback(() => {
-    if (items.length < 2 || gameState !== GameState.IDLE) return;
+    const minItems = pickCount === 2 ? 3 : 2;
+    if (items.length < minItems || gameState !== GameState.IDLE) return;
     setGameState(GameState.SPINNING);
-    setWinner(null);
-  }, [items, gameState]);
+    setWinners([]);
+  }, [items, gameState, pickCount]);
 
   const onSpinEnd = (winnerIndex: number) => {
     const wonItem = items[winnerIndex];
-    setWinner(wonItem);
+    const selectedWinners = [wonItem];
+    
+    // If picking 2, randomly select a second winner from remaining items
+    if (pickCount === 2) {
+      const remainingItems = items.filter((_, idx) => idx !== winnerIndex);
+      const randomIndex = Math.floor(Math.random() * remainingItems.length);
+      selectedWinners.push(remainingItems[randomIndex]);
+    }
+    
+    setWinners(selectedWinners);
     setGameState(GameState.CELEBRATING);
     setShowWinnerModal(true);
     audioManager.playWin();
   };
 
-  const removeWinner = () => {
+  const removeWinners = () => {
+    const winnerTexts = winners.map(w => w.text);
     const newLines = inputText
       .split('\n')
-      .filter(line => line.trim() !== '' && line.trim() !== winner?.text);
+      .filter(line => line.trim() !== '' && !winnerTexts.includes(line.trim()));
     setInputText(newLines.join('\n'));
     setShowWinnerModal(false);
     setGameState(GameState.IDLE);
-    setWinner(null);
+    setWinners([]);
   };
 
   const handleReset = () => {
     const saved = localStorage.getItem(STORAGE_KEY);
     setInputText(saved !== null ? saved : '');
-    setWinner(null);
+    setWinners([]);
     setGameState(GameState.IDLE);
     setShowWinnerModal(false);
   };
 
   const handleRemoveAll = () => {
     setInputText('');
-    setWinner(null);
+    setWinners([]);
     setGameState(GameState.IDLE);
     setShowWinnerModal(false);
   };
@@ -99,6 +111,30 @@ const App: React.FC = () => {
           </h1>
         </div>
         <div className="flex gap-2 pointer-events-auto">
+          <div className="flex items-center gap-2 bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-2">
+            <button
+              onClick={() => setPickCount(1)}
+              disabled={gameState === GameState.SPINNING}
+              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+                pickCount === 1
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-transparent text-slate-400 hover:text-slate-300'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              Pick 1
+            </button>
+            <button
+              onClick={() => setPickCount(2)}
+              disabled={gameState === GameState.SPINNING}
+              className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+                pickCount === 2
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-transparent text-slate-400 hover:text-slate-300'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              Pick 2
+            </button>
+          </div>
           <button 
             onClick={handleReset}
             className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 text-sm font-semibold"
@@ -115,6 +151,7 @@ const App: React.FC = () => {
         <section className="lg:col-span-4 order-2 lg:order-1 flex flex-col gap-6 h-[50vh] lg:h-[80vh]">
           <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 flex flex-col h-full shadow-2xl">
             <div className="flex items-center justify-between mb-4">
+              
               <div className="flex items-center gap-2">
                 <List className="text-blue-400" size={20} />
                 <h2 className="font-bold text-lg">Class List ({items.length})</h2>
@@ -155,10 +192,10 @@ const App: React.FC = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
               <button
                 onClick={handleSpin}
-                disabled={items.length < 2 || gameState !== GameState.IDLE}
+                disabled={(pickCount === 2 ? items.length < 3 : items.length < 2) || gameState !== GameState.IDLE}
                 className={`
                   relative w-24 h-24 rounded-full flex flex-col items-center justify-center font-black transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.5)]
-                  ${gameState === GameState.SPINNING || items.length < 2
+                  ${gameState === GameState.SPINNING || (pickCount === 2 ? items.length < 3 : items.length < 2)
                     ? 'bg-slate-800 text-slate-600 cursor-not-allowed border-4 border-slate-700'
                     : 'bg-white text-slate-900 hover:scale-110 active:scale-90 border-4 border-blue-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.6)]'}
                 `}
@@ -175,9 +212,10 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col items-center gap-2">
+          <div className="mt-6 flex flex-col items-center gap-3">
+            
             <p className="text-slate-500 text-sm font-medium animate-pulse">
-              {gameState === GameState.IDLE ? "Ready to pick a student" : "Spinning..."}
+              {gameState === GameState.IDLE ? `Ready to pick ${pickCount} student${pickCount === 2 ? 's' : ''}` : "Spinning..."}
             </p>
           </div>
         </section>
@@ -195,14 +233,21 @@ const App: React.FC = () => {
             >
               <img src={logo} alt="ClassSpin - Random Picker" width="80" />
             </div>
-            <h3 className="text-blue-400 font-black uppercase tracking-[0.2em] text-sm mb-4">Selected Student</h3>
-            <h2 className="text-6xl font-black text-white mb-10 drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] leading-tight">
-              {winner?.text}
-            </h2>
+            <h3 className="text-blue-400 font-black uppercase tracking-[0.2em] text-sm mb-4">
+              Selected Student{winners.length > 1 ? 's' : ''}
+            </h3>
+            <div className="mb-10">
+              {winners.map((winner, index) => (
+                <h2 key={winner.id} className="text-6xl font-black text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] leading-tight">
+                  {winner.text}
+                  {index < winners.length - 1 && <span className="text-blue-400 mx-3">&</span>}
+                </h2>
+              ))}
+            </div>
             
             <div className="flex flex-col gap-4 w-full">
               <button
-                onClick={removeWinner}
+                onClick={removeWinners}
                 className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-blue-600 hover:bg-blue-500 text-white font-black text-lg rounded-3xl transition-all shadow-xl hover:shadow-blue-500/30"
               >
                 <Trash2 size={24} /> Remove & Spin Again
